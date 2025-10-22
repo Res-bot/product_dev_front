@@ -86,11 +86,15 @@
               }
             ],
             "styles": [
+               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "src/styles.scss"
             ]
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "22875035-5ece-4bb7-b5ab-9517573a70d8"
   }
 }
