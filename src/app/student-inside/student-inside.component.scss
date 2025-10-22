@@ -1,0 +1,517 @@
+// Variables
+$primary-color: #5b7fff;
+$warning-color: #ffc107;
+$danger-color: #f44336;
+$success-color: #4caf50;
+$background: #f5f7fa;
+$card-bg: #ffffff;
+$text-primary: #2c3e50;
+$text-secondary: #7f8c8d;
+$border-color: #e0e6ed;
+$ongoing-color: #4caf50;
+$upcoming-color: #ff6b6b;
+
+// Mixins
+@mixin card-shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@mixin smooth-transition($properties...) {
+  transition: $properties;
+}
+
+// Main Container
+.dashboard-container {
+  min-height: 100vh;
+  background: $background;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: $text-primary;
+}
+
+// Warning Banner
+.warning-banner {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+  border-left: 4px solid $warning-color;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideDown 0.4s ease-out;
+
+  .warning-icon {
+    font-size: 20px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .warning-text {
+    color: #856404;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+// Dashboard Content Layout
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// Card Styles
+.card {
+  background: $card-bg;
+  border-radius: 12px;
+  padding: 24px;
+  @include card-shadow;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0 0 20px 0;
+}
+
+// Attendance Card
+.attendance-card {
+  height: fit-content;
+
+  .attendance-percentage {
+    text-align: center;
+    margin-bottom: 16px;
+
+    .percentage-value {
+      font-size: 48px;
+      font-weight: 700;
+      color: $warning-color;
+      animation: countUp 1s ease-out;
+    }
+
+    .percentage-label {
+      font-size: 13px;
+      color: $text-secondary;
+      margin-top: 4px;
+    }
+  }
+
+  .progress-bar-container {
+    margin-bottom: 24px;
+
+    .progress-bar {
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, $warning-color 0%, #ffb300 100%);
+        border-radius: 4px;
+        transition: width 1s ease-out;
+        animation: progressSlide 1s ease-out;
+      }
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border-color;
+  }
+
+  .stat-item {
+    text-align: center;
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+
+      &.missed {
+        color: $text-primary;
+      }
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: $text-secondary;
+      margin-top: 8px;
+    }
+  }
+
+  .stat-item-single {
+    text-align: center;
+    padding-top: 8px;
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: $text-secondary;
+      margin-top: 8px;
+    }
+  }
+}
+
+// Timetable Card
+.timetable-card {
+  .class-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .class-item {
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid transparent;
+    background: $background;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    @include smooth-transition(transform 0.2s ease, box-shadow 0.2s ease);
+    cursor: pointer;
+
+    &:hover {
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.status-completed {
+      border-left-color: #9e9e9e;
+      opacity: 0.7;
+    }
+
+    &.status-ongoing {
+      border-left-color: $ongoing-color;
+      background: #f1f8f4;
+    }
+
+    &.status-upcoming {
+      border-left-color: $upcoming-color;
+    }
+  }
+
+  .class-info {
+    flex: 1;
+
+    .class-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+
+      .class-subject {
+        font-size: 15px;
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .class-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: capitalize;
+
+        .status-icon {
+          font-size: 10px;
+        }
+
+        &.badge-completed {
+          background: #e0e0e0;
+          color: #757575;
+        }
+
+        &.badge-ongoing {
+          background: #c8e6c9;
+          color: #2e7d32;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        &.badge-upcoming {
+          background: #ffcdd2;
+          color: #c62828;
+        }
+      }
+    }
+
+    .class-details {
+      font-size: 13px;
+      color: $text-secondary;
+
+      .detail-line {
+        margin-bottom: 2px;
+      }
+    }
+  }
+
+  .class-time {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+  }
+}
+
+// Messages Section
+.messages-section {
+  padding: 0 24px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .messages-card {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .messages-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid $border-color;
+
+    .unread-badge {
+      background: #ff4757;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
+
+  .messages-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    min-height: 400px;
+  }
+
+  .messages-list {
+    border-right: 1px solid $border-color;
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  .message-item {
+    padding: 16px 24px;
+    border-bottom: 1px solid $border-color;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    cursor: pointer;
+    @include smooth-transition(background 0.2s ease);
+
+    &:hover {
+      background: #f8f9fa;
+    }
+
+    &.unread {
+      background: #f0f7ff;
+
+      &:hover {
+        background: #e3f2fd;
+      }
+    }
+
+    .message-content {
+      flex: 1;
+
+      .message-sender {
+        font-size: 13px;
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: 4px;
+      }
+
+      .message-title {
+        font-size: 13px;
+        color: $text-secondary;
+        margin-bottom: 8px;
+      }
+
+      .message-badge-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .message-type-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 600;
+
+          .badge-icon {
+            font-size: 10px;
+          }
+
+          &.badge-absence {
+            background: #ffebee;
+            color: #c62828;
+          }
+
+          &.badge-general {
+            background: #e3f2fd;
+            color: #1565c0;
+          }
+        }
+
+        .unread-dot {
+          color: #2196f3;
+          font-size: 12px;
+          animation: blink 1.5s ease-in-out infinite;
+        }
+      }
+    }
+
+    .message-date {
+      font-size: 11px;
+      color: $text-secondary;
+      white-space: nowrap;
+      margin-left: 16px;
+    }
+  }
+
+  .message-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: $text-secondary;
+
+    .preview-icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+
+    .preview-text {
+      font-size: 14px;
+    }
+  }
+}
+
+// Animations
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressSlide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+
+  .messages-layout {
+    grid-template-columns: 1fr;
+
+    .message-preview {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .messages-section {
+    padding: 0 16px 16px;
+  }
+
+  .attendance-percentage .percentage-value {
+    font-size: 36px;
+  }
+
+  .stat-item .stat-value {
+    font-size: 24px;
+  }
+}
