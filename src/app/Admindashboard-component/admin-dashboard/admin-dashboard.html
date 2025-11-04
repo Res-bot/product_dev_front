@@ -1,0 +1,124 @@
+<div class="admin-dashboard">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#1E40AF"/>
+          <g fill="white">
+            <rect x="8" y="8" width="4" height="4"/>
+            <rect x="14" y="8" width="4" height="4"/>
+            <rect x="8" y="14" width="4" height="4"/>
+            <rect x="14" y="14" width="4" height="4"/>
+          </g>
+        </svg>
+      </div>
+      <div class="header-title">
+        <h1>Admin Dashboard</h1>
+        <p *ngIf="!isLoadingUser && adminUser">Welcome back, {{ adminUser.name }}</p>
+        <p *ngIf="!isLoadingUser && !adminUser">Welcome back, Admin User</p>
+        <p *ngIf="isLoadingUser">Loading...</p>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <div class="user-menu">
+        <div class="user-icon" [attr.title]="adminUser?.email || 'Admin'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M4 20C4 16.134 7.582 13 12 13C16.418 13 20 16.134 20 20" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <button 
+          class="logout-btn" 
+          (click)="onLogout()" 
+          title="Logout"
+          aria-label="Logout">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M3 3h8v2H5v10h6v2H3V3zm12.293 4.707L17.586 10l-2.293 2.293 1.414 1.414L21.414 10l-4.707-4.707-1.414 1.414z"/>
+            <path d="M10 9h8v2h-8z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs" role="navigation" aria-label="Main navigation">
+    <button 
+      class="nav-tab" 
+      [class.active]="activeTab === 'overview'"
+      (click)="setActiveTab('overview')"
+      [attr.aria-current]="activeTab === 'overview' ? 'page' : null">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="4" height="4" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="8" y="2" width="4" height="4" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="14" y="2" width="4" height="4" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="2" y="8" width="4" height="4" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="8" y="8" width="4" height="4" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="14" y="8" width="4" height="4" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>Overview</span>
+    </button>
+
+    <button 
+      class="nav-tab" 
+      [class.active]="activeTab === 'users'"
+      (click)="setActiveTab('users')"
+      [attr.aria-current]="activeTab === 'users' ? 'page' : null">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M2 15C2 12.239 4.239 10 7 10C9.761 10 12 12.239 12 15" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="15" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M11 15C11 12.791 12.791 11 15 11C17.209 11 19 12.791 19 15" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>User Management</span>
+    </button>
+
+    <button 
+      class="nav-tab" 
+      [class.active]="activeTab === 'courses'"
+      (click)="setActiveTab('courses')"
+      [attr.aria-current]="activeTab === 'courses' ? 'page' : null">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="2" y="3" width="16" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M2 7H18" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M6 3V17" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>Course Management</span>
+    </button>
+
+    <button 
+      class="nav-tab" 
+      [class.active]="activeTab === 'departments'"
+      (click)="setActiveTab('departments')"
+      [attr.aria-current]="activeTab === 'departments' ? 'page' : null">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="2" y="4" width="16" height="12" rx="1" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M2 8H18" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M6 4V16" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M14 4V16" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>Department Management</span>
+    </button>
+
+    <button 
+  class="nav-tab" 
+  [class.active]="activeTab === 'schedules'"
+  (click)="setActiveTab('schedules')"
+  [attr.aria-current]="activeTab === 'schedules' ? 'page' : null">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <rect x="2" y="3" width="16" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M2 7H18" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M6 3V7M14 3V7" stroke="currentColor" stroke-width="1.5"/>
+  </svg>
+  <span>Schedule Management</span>
+</button>
+
+  </nav>
+
+  <!-- Router Outlet for Child Routes -->
+  <main class="dashboard-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,143 @@
+<div class="enrollment-container">
+  <!-- Header -->
+  <div class="enrollment-header">
+    <h1>Course Enrollment</h1>
+    <p class="subtitle">Browse and enroll in available courses</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading courses...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-banner">
+    <div class="error-icon">❌</div>
+    <p>{{ error }}</p>
+    <button (click)="loadCourses()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && !error" class="enrollment-content">
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search courses by name, code, or teacher..."
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'available'"
+        (click)="switchTab('available')"
+      >
+        Available Courses ({{ availableCourses.length }})
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'enrolled'"
+        (click)="switchTab('enrolled')"
+      >
+        My Courses ({{ enrolledCourses.length }})
+      </button>
+    </div>
+
+    <!-- Available Courses Tab -->
+    <div *ngIf="activeTab === 'available'" class="courses-grid">
+      <div *ngIf="filteredAvailableCourses.length === 0" class="no-courses">
+        <p>{{ searchTerm ? 'No courses found matching your search.' : 'No courses available for enrollment.' }}</p>
+      </div>
+
+      <div
+        *ngFor="let course of filteredAvailableCourses"
+        class="course-card"
+      >
+        <div class="course-header">
+          <h3 class="course-name">{{ course.name }}</h3>
+          <span class="course-code">{{ course.courseCode }}</span>
+        </div>
+
+        <div class="course-details">
+          <div class="detail-item">
+            <span class="label">Credits:</span>
+            <span class="value">{{ course.credits }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Teacher:</span>
+            <span class="value">{{ course.teacherName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Department:</span>
+            <span class="value">{{ course.departmentName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Enrolled:</span>
+            <span class="value">{{ course.enrolledStudentsCount }} students</span>
+          </div>
+        </div>
+
+        <p class="course-description">{{ course.description || 'No description available' }}</p>
+
+        <button
+          class="enroll-btn"
+          (click)="enrollInCourse(course.id, course.name)"
+        >
+          Enroll Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Enrolled Courses Tab -->
+    <div *ngIf="activeTab === 'enrolled'" class="courses-grid">
+      <div *ngIf="filteredEnrolledCourses.length === 0" class="no-courses">
+        <p>{{ searchTerm ? 'No enrolled courses found matching your search.' : 'You are not enrolled in any courses yet.' }}</p>
+        <button (click)="switchTab('available')" class="browse-btn">
+          Browse Available Courses
+        </button>
+      </div>
+
+      <div
+        *ngFor="let course of filteredEnrolledCourses"
+        class="course-card enrolled"
+      >
+        <div class="enrolled-badge">✓ Enrolled</div>
+        
+        <div class="course-header">
+          <h3 class="course-name">{{ course.name }}</h3>
+          <span class="course-code">{{ course.courseCode }}</span>
+        </div>
+
+        <div class="course-details">
+          <div class="detail-item">
+            <span class="label">Credits:</span>
+            <span class="value">{{ course.credits }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Teacher:</span>
+            <span class="value">{{ course.teacherName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Department:</span>
+            <span class="value">{{ course.departmentName }}</span>
+          </div>
+        </div>
+
+        <p class="course-description">{{ course.description || 'No description available' }}</p>
+
+        <button
+          class="unenroll-btn"
+          (click)="unenrollFromCourse(course.id, course.name)"
+        >
+          Unenroll
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
