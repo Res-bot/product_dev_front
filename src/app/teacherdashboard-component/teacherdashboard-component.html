@@ -1,0 +1,795 @@
+<div class="teacher-dashboard">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <h2>Teacher Portal</h2>
+      </div>
+    </div>
+
+    <!-- User Profile -->
+    <div class="user-profile">
+      <div class="avatar">{{ teacherName.charAt(0).toUpperCase() }}</div>
+      <div class="user-info">
+        <h3>{{ teacherName }}</h3>
+        <p class="role">{{ userRole }}</p>
+        <p class="email">{{ userEmail }}</p>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="nav-menu">
+      <ul>
+        <li [class.active]="activeView === 'overview'">
+          <a (click)="navigateTo('overview')">
+            <span class="nav-icon">📊</span>
+            <span>Overview</span>
+          </a>
+        </li>
+        <li [class.active]="activeView === 'attendance'">
+          <a (click)="navigateTo('attendance')">
+            <span class="nav-icon">✅</span>
+            <span>Mark Attendance</span>
+          </a>
+        </li>
+        <li [class.active]="activeView === 'leave'">
+          <a (click)="navigateTo('leave')">
+            <span class="nav-icon">📝</span>
+            <span>Apply Leave</span>
+          </a>
+        </li>
+        <li [class.active]="activeView === 'leave-status'">
+          <a (click)="navigateTo('leave-status')">
+            <span class="nav-icon">📬</span>
+            <span>Leave Status</span>
+          </a>
+        </li>
+
+
+        <li [class.active]="activeView === 'schedules'">
+          <a (click)="navigateTo('schedules')">
+            <span class="nav-icon">📅</span>
+            <span>My Schedule</span>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <span class="nav-icon">🚪</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <!-- Alert Messages -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="alert-icon">✅</span>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="alert-icon">⚠️</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- OVERVIEW VIEW -->
+    <div *ngIf="activeView === 'overview'" class="view-container">
+      <div class="page-header">
+        <div class="header-content">
+          <h1>Welcome back, {{ teacherName }}! 👋</h1>
+          <p class="date-info">{{ currentMonth }} {{ currentDay }}, {{ currentYear }}</p>
+        </div>
+        <button class="btn-refresh" (click)="refreshOverview()">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">📚</div>
+          <div class="stat-details">
+            <h3>{{ totalSubjects }}</h3>
+            <p>Total Subjects</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon orange">⏳</div>
+          <div class="stat-details">
+            <h3>{{ pendingLeaves }}</h3>
+            <p>Pending Leaves</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-details">
+            <h3>{{ approvedLeaves }}</h3>
+            <p>Approved Leaves</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+          <div class="action-card" (click)="navigateTo('attendance')">
+            <div class="action-icon">✅</div>
+            <h3>Mark Attendance</h3>
+            <p>Take attendance for your classes</p>
+          </div>
+
+          <div class="action-card" (click)="navigateTo('leave')">
+            <div class="action-icon">📝</div>
+            <h3>Apply for Leave</h3>
+            <p>Submit a new leave request</p>
+          </div>
+
+          <div class="action-card" (click)="navigateTo('leave-status')">
+            <div class="action-icon">📬</div>
+            <h3>View Leave Status</h3>
+            <p>Check your leave applications</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subjects List -->
+      <div class="subjects-section">
+        <div class="section-header">
+          <h2>My Subjects</h2>
+          <span class="badge">{{ subjects.length }} subjects</span>
+        </div>
+
+        <div class="subjects-grid" *ngIf="subjects.length > 0">
+          <div class="subject-card" *ngFor="let subject of subjects">
+            <div class="subject-header">
+              <div class="subject-icon">📖</div>
+              <span class="subject-code" *ngIf="subject.courseCode">{{ subject.courseCode }}</span>
+            </div>
+            <h3>{{ subject.name }}</h3>
+            <button class="btn-primary" (click)="navigateTo('attendance')">
+              Take Attendance
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="subjects.length === 0" class="empty-state">
+          <div class="empty-icon">📚</div>
+          <h3>No Subjects Assigned</h3>
+          <p>You don't have any subjects assigned yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE VIEW - Replace the entire section starting around line 170 -->
+<div *ngIf="activeView === 'attendance'" class="view-container">
+  <div class="page-header">
+    <h1>📋 Mark Attendance</h1>
+    <p>Select subject, session, and mark student attendance</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-group">
+      <label for="subject">Select Subject</label>
+      <select
+        id="subject"
+        [(ngModel)]="selectedSubjectId"
+        (change)="onSubjectChange()"
+        class="form-control">
+        <option [value]="0">-- Select a Subject --</option>
+        <option *ngFor="let subject of subjects" [value]="subject.id">
+          {{ subject.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="date">Attendance Date</label>
+        <input
+          type="date"
+          id="date"
+          [(ngModel)]="attendanceDate"
+          class="form-control"
+          [max]="attendanceDate">
+      </div>
+      <!-- REPLACE THE PROBLEMATIC LINES IN YOUR HTML -->
+
+        <!-- Around line 197 - Session Selection Form Group -->
+      <div class="form-group">
+        <label for="session">
+          <span class="label-with-icon">
+            🕐 Select Session Time
+            <span class="required-badge">Required</span>
+          </span>
+        </label>
+        <select
+          id="session"
+          [(ngModel)]="selectedSession"
+          class="form-control session-select"
+          [class.session-selected]="selectedSession">
+          <option value="">-- Select Session Time --</option>
+          <option *ngFor="let session of availableSessions" [value]="session.name">
+            {{ session.displayName }}
+          </option>
+        </select>
+        <small class="form-hint" *ngIf="!selectedSession">
+          ⚠️ Please select a session before marking attendance
+        </small>
+        <!-- FIX: Use getSessionDisplay() method instead of inline find -->
+        <small class="form-hint-success" *ngIf="selectedSession">
+          ✓ Session selected: {{ getSessionDisplay() }}
+        </small>
+      </div>
+
+      <!-- Around line 226 - Attendance Summary Session Info -->
+      <div class="attendance-summary" *ngIf="students.length > 0">
+        <div class="summary-item">
+          <span class="label">Total:</span>
+          <span class="value">{{ students.length }}</span>
+        </div>
+        <div class="summary-item present">
+          <span class="label">Present:</span>
+          <span class="value">{{ getPresentCount() }}</span>
+        </div>
+        <div class="summary-item absent">
+          <span class="label">Absent:</span>
+          <span class="value">{{ getAbsentCount() }}</span>
+        </div>
+        <!-- FIX: Use getSessionDisplay() method -->
+        <div class="summary-item session-info" *ngIf="selectedSession">
+          <span class="label">Session:</span>
+          <span class="value session-time">{{ getSessionDisplay() }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="attendance-summary" *ngIf="students.length > 0">
+      <div class="summary-item">
+        <span class="label">Total:</span>
+        <span class="value">{{ students.length }}</span>
+      </div>
+      <div class="summary-item present">
+        <span class="label">Present:</span>
+        <span class="value">{{ getPresentCount() }}</span>
+      </div>
+      <div class="summary-item absent">
+        <span class="label">Absent:</span>
+        <span class="value">{{ getAbsentCount() }}</span>
+      </div>
+      <!-- NEW: Session Info -->
+      <div class="summary-item session-info" *ngIf="selectedSession">
+        <span class="label">Session:</span>
+<!-- CORRECT -->
+        <span class="value session-time">{{ getSessionDisplay() }}</span>      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoadingStudents" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading students...</p>
+  </div>
+
+  <div class="students-card" *ngIf="!isLoadingStudents && students.length > 0">
+    <div class="card-header">
+      <h2>Students List ({{ students.length }})</h2>
+      <div class="bulk-actions">
+        <button class="btn-success-sm" (click)="markAllPresent()">
+          ✅ All Present
+        </button>
+        <button class="btn-danger-sm" (click)="markAllAbsent()">
+          ❌ All Absent
+        </button>
+      </div>
+    </div>
+
+    <div class="students-list">
+      <div class="student-item" *ngFor="let student of students">
+        <div class="student-info">
+          <div class="student-avatar">{{ student.name.charAt(0).toUpperCase() }}</div>
+          <div class="student-details">
+            <h3>{{ student.name }}</h3>
+            <p>{{ student.email }}</p>
+          </div>
+        </div>
+        <label class="checkbox-wrapper">
+          <input
+            type="checkbox"
+            [(ngModel)]="student.present"
+            [id]="'student-' + student.id">
+          <span class="checkbox-label" [class.present]="student.present">
+            {{ student.present ? 'Present' : 'Absent' }}
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button
+        class="btn-primary-lg"
+        (click)="submitAttendance()"
+        [disabled]="isSubmitting || !selectedSession">
+        <span *ngIf="!isSubmitting && selectedSession">💾 Submit Attendance</span>
+        <span *ngIf="!isSubmitting && !selectedSession">⚠️ Select Session First</span>
+        <span *ngIf="isSubmitting">⏳ Submitting...</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoadingStudents && students.length === 0 && selectedSubjectId > 0">
+    <div class="empty-icon">👥</div>
+    <h3>No Students Found</h3>
+    <p>There are no students enrolled in this subject.</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoadingStudents && selectedSubjectId === 0">
+    <div class="empty-icon">📚</div>
+    <h3>Select a Subject</h3>
+    <p>Please select a subject to view and mark attendance.</p>
+  </div>
+</div>
+
+    <!-- LEAVE APPLICATION VIEW -->
+    <div *ngIf="activeView === 'leave'" class="view-container">
+      <div class="page-header">
+        <h1>📝 Apply for Leave</h1>
+        <p>Submit your leave request</p>
+      </div>
+
+      <div class="leave-form-card">
+        <form (ngSubmit)="submitLeaveRequest()" #leaveForm="ngForm">
+          <div class="form-group">
+            <label for="teacherId">Teacher ID</label>
+            <input
+              type="number"
+              id="teacherId"
+              name="teacherId"
+              [(ngModel)]="leaveData.teacherId"
+              class="form-control"
+              readonly>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="startDate">Start Date</label>
+              <input
+                type="date"
+                id="startDate"
+                name="startDate"
+                [(ngModel)]="leaveData.startDate"
+                class="form-control"
+                [min]="minDate"
+                required>
+            </div>
+
+            <div class="form-group">
+              <label for="endDate">End Date</label>
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                [(ngModel)]="leaveData.endDate"
+                class="form-control"
+                [min]="leaveData.startDate || minDate"
+                required>
+            </div>
+          </div>
+
+          <div class="leave-days" *ngIf="calculateLeaveDays() > 0">
+            <span class="days-label">Total Leave Days:</span>
+            <span class="days-value">{{ calculateLeaveDays() }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="reason">Reason for Leave</label>
+            <textarea
+              id="reason"
+              name="reason"
+              [(ngModel)]="leaveData.reason"
+              class="form-control"
+              rows="4"
+              placeholder="Enter reason for leave..."
+              required></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="btn-primary-lg"
+            [disabled]="leaveForm.invalid || isSubmitting">
+            <span *ngIf="!isSubmitting">📤 Submit Request</span>
+            <span *ngIf="isSubmitting">⏳ Submitting...</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- LEAVE STATUS VIEW -->
+    <div *ngIf="activeView === 'leave-status'" class="view-container">
+      <div class="page-header">
+        <h1>📬 Leave Status</h1>
+        <p>View your leave applications</p>
+      </div>
+
+      <div *ngIf="isLoadingLeaves" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading leave requests...</p>
+      </div>
+
+      <div class="leave-list" *ngIf="!isLoadingLeaves && myLeaves.length > 0">
+        <div class="leave-card" *ngFor="let leave of myLeaves">
+          <div class="leave-header">
+            <h3>Leave Request #{{ leave.id }}</h3>
+            <span class="status-badge" [ngClass]="getStatusClass(leave.status)">
+              {{ leave.status }}
+            </span>
+          </div>
+          <div class="leave-details">
+            <div class="detail-row">
+              <span class="label">From:</span>
+              <span class="value">{{ leave.startDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">To:</span>
+              <span class="value">{{ leave.endDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Reason:</span>
+              <span class="value">{{ leave.reason }}</span>
+            </div>
+            <div class="detail-row" *ngIf="leave.appliedDate">
+              <span class="label">Applied On:</span>
+              <span class="value">{{ leave.appliedDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoadingLeaves && myLeaves.length === 0">
+        <div class="empty-icon">📬</div>
+        <h3>No Leave Requests</h3>
+        <p>You haven't submitted any leave requests yet.</p>
+        <button class="btn-primary" (click)="navigateTo('leave')">
+          Apply for Leave
+        </button>
+
+        </div>
+    </div>
+
+    <!-- APPROVE TEACHER LEAVES VIEW -->
+    <div *ngIf="activeView === 'approve-teacher-leaves'" class="view-container">
+      <div class="page-header">
+        <h1>👥 Approve Employee Leaves</h1>
+        <p>Review and approve/reject teacher leave requests</p>
+      </div>
+
+      <div *ngIf="isLoadingTeacherLeaves" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading teacher leave requests...</p>
+      </div>
+
+      <div class="leave-list" *ngIf="!isLoadingTeacherLeaves && teacherPendingLeaves.length > 0">
+        <div class="leave-approval-card" *ngFor="let leave of teacherPendingLeaves">
+          <div class="leave-header">
+            <div>
+              <h3>{{ leave.userName }}</h3>
+              <p class="leave-id">Request #{{ leave.id }}</p>
+            </div>
+            <span class="status-badge status-pending">
+              {{ leave.status }}
+            </span>
+          </div>
+
+          <div class="leave-details">
+            <div class="detail-row">
+              <span class="label">📅 From:</span>
+              <span class="value">{{ leave.startDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">📅 To:</span>
+              <span class="value">{{ leave.endDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">📝 Duration:</span>
+              <span class="value">{{ calculateDays(leave.startDate, leave.endDate) }} day(s)</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">💬 Reason:</span>
+              <span class="value">{{ leave.reason }}</span>
+            </div>
+            <div class="detail-row" *ngIf="leave.appliedDate">
+              <span class="label">🕐 Applied On:</span>
+              <span class="value">{{ leave.appliedDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="approval-actions">
+            <button class="btn-approve" (click)="approveTeacherLeave(leave.id)">
+              ✅ Approve
+            </button>
+            <button class="btn-reject" (click)="rejectTeacherLeave(leave.id)">
+              ❌ Reject
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoadingTeacherLeaves && teacherPendingLeaves.length === 0">
+        <div class="empty-icon">👥</div>
+        <h3>No Pending Requests</h3>
+        <p>There are no pending teacher leave requests to review.</p>
+      </div>
+    </div>
+
+    <!-- APPROVE EMPLOYEE LEAVES VIEW -->
+    <div *ngIf="activeView === 'approve-employee-leaves'" class="view-container">
+      <div class="page-header">
+        <h1>👔 Approve Teacher Leaves</h1>
+        <p>Review and approve/reject employee leave requests</p>
+      </div>
+
+      <div *ngIf="isLoadingEmployeeLeaves" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading employee leave requests...</p>
+      </div>
+
+      <div class="leave-list" *ngIf="!isLoadingEmployeeLeaves && employeePendingLeaves.length > 0">
+        <div class="leave-approval-card" *ngFor="let leave of employeePendingLeaves">
+          <div class="leave-header">
+            <div>
+              <h3>{{ leave.employeeName }}</h3>
+              <p class="leave-id">Employee Request #{{ leave.id }}</p>
+            </div>
+            <span class="status-badge status-pending">
+              {{ leave.status }}
+            </span>
+          </div>
+
+          <div class="leave-details">
+            <div class="detail-row">
+              <span class="label">📅 From:</span>
+              <span class="value">{{ leave.startDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">📅 To:</span>
+              <span class="value">{{ leave.endDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">📝 Duration:</span>
+              <span class="value">{{ calculateDays(leave.startDate, leave.endDate) }} day(s)</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">💬 Reason:</span>
+              <span class="value">{{ leave.reason }}</span>
+            </div>
+            <div class="detail-row" *ngIf="leave.appliedDate">
+              <span class="label">🕐 Applied On:</span>
+              <span class="value">{{ leave.appliedDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="approval-actions">
+            <button class="btn-approve" (click)="approveEmployeeLeave(leave.id)">
+              ✅ Approve
+            </button>
+            <button class="btn-reject" (click)="rejectEmployeeLeave(leave.id)">
+              ❌ Reject
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoadingEmployeeLeaves && employeePendingLeaves.length === 0">
+        <div class="empty-icon">👔</div>
+        <h3>No Pending Requests</h3>
+        <p>There are no pending employee leave requests to review.</p>
+      </div>
+    </div>
+
+    <!-- ABSENT STUDENTS EMAIL VIEW -->
+    <div *ngIf="activeView === 'absent-students'" class="view-container">
+      <div class="page-header">
+        <h1>📧 Send Absence Notifications</h1>
+        <p>Send email notifications to absent students</p>
+      </div>
+
+      <!-- Course Info -->
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">📚 Course:</span>
+          <span class="info-value">{{ getLastMarkedCourseName() }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📅 Date:</span>
+          <span class="info-value">{{ lastMarkedDate | date: 'MMM dd, yyyy' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">❌ Total Absent:</span>
+          <span class="info-value">{{ absentStudents.length }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">✅ Selected:</span>
+          <span class="info-value">{{ selectedAbsentStudentIds.length }}</span>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoadingAbsentStudents" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading absent students...</p>
+      </div>
+
+      <!-- Absent Students List -->
+      <div class="students-card" *ngIf="!isLoadingAbsentStudents && absentStudents.length > 0">
+        <div class="card-header">
+          <h2>Absent Students ({{ absentStudents.length }})</h2>
+          <div class="bulk-actions">
+            <button class="btn-success-sm" (click)="selectAllAbsentStudents()">
+              ✅ Select All
+            </button>
+            <button class="btn-danger-sm" (click)="deselectAllAbsentStudents()">
+              ❌ Deselect All
+            </button>
+          </div>
+        </div>
+
+        <div class="students-list">
+          <div class="student-item" *ngFor="let student of absentStudents">
+            <div class="student-info">
+              <div class="student-avatar absent-avatar">{{ student.name.charAt(0).toUpperCase() }}</div>
+              <div class="student-details">
+                <h3>{{ student.name }}</h3>
+                <p>{{ student.email }}</p>
+              </div>
+            </div>
+            <label class="checkbox-wrapper">
+              <input
+                type="checkbox"
+                [checked]="isStudentSelected(student.id)"
+                (change)="toggleStudentSelection(student.id)"
+                [id]="'absent-student-' + student.id">
+              <span class="checkbox-label" [class.selected]="isStudentSelected(student.id)">
+                {{ isStudentSelected(student.id) ? 'Selected' : 'Not Selected' }}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button
+            class="btn-secondary-lg"
+            (click)="backToAttendance()">
+            ← Back to Attendance
+          </button>
+          <button
+            class="btn-primary-lg"
+            (click)="sendAbsenceEmails()"
+            [disabled]="isSendingEmails || selectedAbsentStudentIds.length === 0">
+            <span *ngIf="!isSendingEmails">📧 Send Email ({{ selectedAbsentStudentIds.length }})</span>
+            <span *ngIf="isSendingEmails">⏳ Sending Emails...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- No Absent Students -->
+      <div class="empty-state" *ngIf="!isLoadingAbsentStudents && absentStudents.length === 0">
+        <div class="empty-icon">🎉</div>
+        <h3>No Absent Students!</h3>
+        <p>All students were present for this class.</p>
+        <button class="btn-primary" (click)="backToAttendance()">
+          ← Back to Attendance
+        </button>
+      </div>
+    </div>
+
+    <!-- SCHEDULES VIEW -->
+<div *ngIf="activeView === 'schedules'" class="view-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>📅 My Class Schedule</h1>
+      <p>View your weekly class timetable</p>
+    </div>
+    <button class="btn-refresh" (click)="loadTeacherSchedules()">
+      🔄 Refresh
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoadingSchedules" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading schedules...</p>
+  </div>
+
+  <!-- Today's Classes Card -->
+  <div *ngIf="!isLoadingSchedules && todaySchedules.length > 0" class="today-classes-card">
+    <div class="card-header">
+      <h2>🌟 Today's Classes ({{ getTodayName() }})</h2>
+      <span class="badge">{{ todaySchedules.length }} class{{ todaySchedules.length > 1 ? 'es' : '' }}</span>
+    </div>
+    <div class="schedule-grid">
+      <div class="schedule-card today" *ngFor="let schedule of todaySchedules">
+        <div class="schedule-time">
+          <span class="time-icon">🕐</span>
+          <span>{{ schedule.startTime }} - {{ schedule.endTime }}</span>
+        </div>
+        <div class="schedule-details">
+          <h3>{{ schedule.courseName }}</h3>
+          <p class="course-code" *ngIf="schedule.courseCode">{{ schedule.courseCode }}</p>
+          <div class="schedule-meta">
+            <span *ngIf="schedule.roomNumber">📍 Room {{ schedule.roomNumber }}</span>
+            <span *ngIf="schedule.batch">👥 Batch {{ schedule.batch }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day Filter Tabs -->
+  <div *ngIf="!isLoadingSchedules && schedules.length > 0" class="day-tabs">
+    <button
+      *ngFor="let day of daysOfWeek"
+      class="day-tab"
+      [class.active]="selectedDay === day"
+      [class.has-classes]="hasDayClasses(day)"
+      [class.today]="isToday(day)"
+      (click)="filterByDay(day)">
+      <span class="day-name">{{ day.substring(0, 3) }}</span>
+      <span class="class-count" *ngIf="hasDayClasses(day)">{{ getDayClassCount(day) }}</span>
+      <span class="today-badge" *ngIf="isToday(day)">Today</span>
+    </button>
+  </div>
+
+  <!-- Schedule List for Selected Day -->
+  <div *ngIf="!isLoadingSchedules && getSchedulesForDay(selectedDay).length > 0" class="schedules-section">
+    <div class="section-header">
+      <h2>{{ selectedDay }} Classes</h2>
+      <span class="badge">{{ getSchedulesForDay(selectedDay).length }} class{{ getSchedulesForDay(selectedDay).length > 1 ? 'es' : '' }}</span>
+    </div>
+
+    <div class="schedule-grid">
+      <div class="schedule-card" *ngFor="let schedule of getSchedulesForDay(selectedDay)">
+        <div class="schedule-time">
+          <span class="time-icon">🕐</span>
+          <span>{{ schedule.startTime }} - {{ schedule.endTime }}</span>
+        </div>
+        <div class="schedule-details">
+          <h3>{{ schedule.courseName }}</h3>
+          <p class="course-code" *ngIf="schedule.courseCode">{{ schedule.courseCode }}</p>
+          <div class="schedule-meta">
+            <span *ngIf="schedule.roomNumber">📍 Room {{ schedule.roomNumber }}</span>
+            <span *ngIf="schedule.batch">👥 Batch {{ schedule.batch }}</span>
+            <span *ngIf="schedule.departmentName">🏛️ {{ schedule.departmentName }}</span>
+          </div>
+          <p class="schedule-notes" *ngIf="schedule.notes">{{ schedule.notes }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Classes for Selected Day -->
+  <div *ngIf="!isLoadingSchedules && selectedDay && getSchedulesForDay(selectedDay).length === 0" class="empty-state">
+    <div class="empty-icon">📅</div>
+    <h3>No Classes on {{ selectedDay }}</h3>
+    <p>You don't have any classes scheduled for this day.</p>
+  </div>
+
+  <!-- No Schedules at All -->
+  <div *ngIf="!isLoadingSchedules && schedules.length === 0" class="empty-state">
+    <div class="empty-icon">📅</div>
+    <h3>No Schedule Found</h3>
+    <p>You don't have any class schedules assigned yet.</p>
+  </div>
+</div>
+
+  </main>
+</div>
+

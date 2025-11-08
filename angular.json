@@ -67,6 +67,7 @@
             },
             "development": {
               "buildTarget": "attendance-dashboard:build:development"
+              
             }
           },
           "defaultConfiguration": "development"
@@ -86,7 +87,7 @@
               }
             ],
             "styles": [
-               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "src/styles.scss"
             ]
           }

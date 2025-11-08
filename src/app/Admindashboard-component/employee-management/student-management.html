@@ -1,0 +1,159 @@
+<div class="student-management-container">
+
+  <!-- Header Section with New Search Features -->
+  <div class="header-section">
+    <div class="filters-group">
+      
+      <!-- Search by User ID -->
+      <div class="search-wrapper">
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Search by User ID"
+          [(ngModel)]="searchUserId"
+          (keyup.enter)="getUserById()">
+        <button class="search-button" (click)="getUserById()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M14 14L10.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search by Email -->
+      <div class="search-wrapper">
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Search by Email"
+          [(ngModel)]="searchEmail"
+          (keyup.enter)="searchUsersByEmail()">
+        <button class="search-button" (click)="searchUsersByEmail()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M14 14L10.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Filter by Role -->
+      <div class="dropdown-wrapper">
+        <select class="dropdown" [(ngModel)]="selectedRole" (change)="onRoleChange()">
+          <option value="all">All Roles</option>
+          <option value="STUDENT">STUDENT</option>
+          <option value="TEACHER">TEACHER</option>
+          <option value="EMPLOYEE">EMPLOYEE</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+        <svg class="dropdown-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Filter by Department -->
+      <div class="dropdown-wrapper">
+        <select class="dropdown" [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()">
+          <option value="all">All Departments</option>
+          <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+        </select>
+        <svg class="dropdown-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Clear Filters Button -->
+      <button class="clear-button" (click)="clearFilters()" title="Clear all filters">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Clear
+      </button>
+    </div>
+
+    <!-- Add User Button -->
+    <button class="add-button" (click)="onAddStudent()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M10 5V15M5 10H15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Add User
+    </button>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading users...</p>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <table class="students-table">
+      <thead>
+        <tr>
+          <th>NAME</th>
+          <th>EMAIL</th>
+          <th>USER ID</th>
+          <th>DEPARTMENT</th>
+          <th>DESIGNATION</th>
+          <th>ROLE</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of students">
+          <td class="name-cell">{{ student.name }}</td>
+          <td>{{ student.email }}</td>
+          <td>{{ student.id }}</td>
+          <td>{{ student.department }}</td>
+          <td>{{ student.designation }}</td>
+          <td>
+            <span class="role-badge" 
+                  [class.role-student]="student.role === 'STUDENT'"
+                  [class.role-teacher]="student.role === 'TEACHER'"
+                  [class.role-employee]="student.role === 'EMPLOYEE' || student.role === 'STAFF'"
+                  [class.role-admin]="student.role === 'ADMIN'">
+              {{ student.role }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="edit-button" (click)="onEdit(student)" title="Edit User">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M11.3333 2.66667L13.3333 4.66667M1.66667 14.3333H3.66667L12 6L10 4L1.66667 12.3333V14.3333Z" 
+                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Edit
+            </button>
+            <button class="delete-button" (click)="onDelete(student)" title="Delete User">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4H14M6.5 7V12M9.5 7V12M3 4L4 13C4 13.5304 4.21071 14.0391 4.58579 14.4142C4.96086 14.7893 5.46957 15 6 15H10C10.5304 15 11.0391 14.7893 11.4142 14.4142C11.7893 14.0391 12 13.5304 12 13L13 4M5.5 4V2.5C5.5 2.23478 5.60536 1.98043 5.79289 1.79289C5.98043 1.60536 6.23478 1.5 6.5 1.5H9.5C9.76522 1.5 10.0196 1.60536 10.2071 1.79289C10.3946 1.98043 10.5 2.23478 10.5 2.5V4" 
+                      stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Delete
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="students.length === 0" class="empty-row">
+          <td colspan="7" class="empty-cell">
+            <div class="empty-state">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <path d="M32 8C18.745 8 8 18.745 8 32C8 45.255 18.745 56 32 56C45.255 56 56 45.255 56 32C56 18.745 45.255 8 32 8ZM32 20C35.314 20 38 22.686 38 26C38 29.314 35.314 32 32 32C28.686 32 26 29.314 26 26C26 22.686 28.686 20 32 20ZM32 48C26 48 20.66 45.02 17.6 40.52C17.68 35.9 26.4 33.32 32 33.32C37.58 33.32 46.32 35.9 46.4 40.52C43.34 45.02 38 48 32 48Z" 
+                      fill="#CBD5E1"/>
+              </svg>
+              <p class="empty-text">No users found</p>
+              <p class="empty-subtext">Try adjusting your search criteria or clear filters</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add/Edit Student Modal -->
+  <app-add-student-modal
+    [isOpen]="isAddStudentModalOpen"
+    [isEditMode]="isEditMode"
+    [studentData]="editingStudent"
+    (close)="onCloseModal()"
+    (submit)="onSubmitStudent($event)">
+  </app-add-student-modal>
+</div>

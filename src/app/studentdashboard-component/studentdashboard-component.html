@@ -1,0 +1,250 @@
+<div class="dashboard-container">
+  
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading dashboard...</p>
+  </div>
+
+  <!-- Error Banner -->
+  <div *ngIf="error && !isLoading" class="error-banner">
+    <div class="error-icon">❌</div>
+    <p>{{ error }}</p>
+    <button (click)="loadAllData()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <div *ngIf="!isLoading">
+    
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div class="header-info">
+        <h1 class="dashboard-title">Student Dashboard</h1>
+        <p class="welcome-text">Welcome back, {{ studentName }}</p>
+        <p class="date-text">{{ currentDate }}</p>
+      </div>
+      <div class="header-actions">
+        <button (click)="navigateToCourseEnrollment()" class="btn-secondary">
+          📚 Course Enrollment
+        </button>
+        <button (click)="logout()" class="btn-logout">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Low Attendance Warning Banner -->
+    <div *ngIf="showLowAttendanceWarning" class="warning-banner">
+      <div class="warning-icon">⚠</div>
+      <div class="warning-content">
+        <p class="warning-text">
+          <strong>Warning:</strong> Your attendance is below 85%. Consider improving your attendance.
+        </p>
+        <div *ngIf="lowAttendanceAlerts.length > 0" class="alert-details">
+          <div *ngFor="let alert of lowAttendanceAlerts" class="alert-item">
+            {{ alert }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      
+      <!-- Left Column: Attendance Cards -->
+      <div class="left-column">
+        
+        <!-- Overall Attendance Card -->
+        <div class="card attendance-card">
+          <h2 class="card-title">Attendance Overview</h2>
+          
+          <!-- Circular Progress -->
+          <div class="attendance-circle-container">
+            <svg class="attendance-circle" viewBox="0 0 120 120">
+              <circle
+                class="circle-background"
+                cx="60"
+                cy="60"
+                r="54"
+              />
+              <circle
+                class="circle-progress"
+                cx="60"
+                cy="60"
+                r="54"
+                [attr.stroke]="getAttendanceColor()"
+                [style.strokeDashoffset]="339.292 - (339.292 * attendancePercentage) / 100"
+              />
+            </svg>
+            <div class="attendance-percentage">
+              <span class="percentage-value">{{ attendancePercentage }}%</span>
+              <span class="percentage-label">Overall Attendance</span>
+            </div>
+          </div>
+
+          <!-- Attendance Statistics -->
+          <div class="attendance-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ hoursAttended }}</span>
+              <span class="stat-label">Hours Attended</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ totalHours }}</span>
+              <span class="stat-label">Total Hours</span>
+            </div>
+          </div>
+
+          <!-- Classes Skipped -->
+          <div class="skipped-classes">
+            <span class="skipped-value">{{ classesSkipped }}</span>
+            <span class="skipped-label">Classes Skipped</span>
+          </div>
+
+          <!-- View History Button -->
+          <!-- <button (click)="viewAttendanceHistory()" class="view-history-btn">
+            📜 View Attendance History
+          </button> -->
+        </div>
+
+        <!-- Course-wise Attendance Card -->
+        <div class="card course-attendance-card" *ngIf="courseAttendance.length > 0">
+          <h2 class="card-title">Course-wise Attendance</h2>
+          <div class="course-list">
+            <div *ngFor="let course of courseAttendance" class="course-item">
+              <div class="course-header">
+                <div>
+                  <h3 class="course-name">{{ course.courseName }}</h3>
+                  <span class="course-code">{{ course.courseCode }}</span>
+                </div>
+                <span class="course-percentage" 
+                      [style.color]="course.attendancePercentage >= 75 ? '#10b981' : '#ef4444'">
+                  {{ course.attendancePercentage }}%
+                </span>
+              </div>
+              <div class="course-details">
+                <span>✓ Present: {{ course.presentCount }}</span>
+                <span>✗ Absent: {{ course.absentCount }}</span>
+                <span>📊 Total: {{ course.totalClasses }}</span>
+              </div>
+              <div class="course-meta" *ngIf="course.teacherName">
+                <span>👨‍🏫 {{ course.teacherName }}</span>
+                <span *ngIf="course.credits">{{ course.credits }} Credits</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" 
+                     [style.width.%]="course.attendancePercentage"
+                     [style.background-color]="course.attendancePercentage >= 75 ? '#10b981' : '#ef4444'">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Courses Message -->
+        <div class="card" *ngIf="courseAttendance.length === 0">
+          <div class="no-data">
+            <p>📚 No course attendance data available</p>
+            <button (click)="navigateToCourseEnrollment()" class="btn-primary">
+              Enroll in Courses
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Schedule & Enrolled Courses -->
+      <div class="right-column">
+        
+        <!-- Today's Timetable Card -->
+        <div class="card timetable-card">
+          <h2 class="card-title">Today's Timetable</h2>
+
+          <!-- No Schedule Message -->
+          <div *ngIf="todaySchedule.length === 0" class="no-schedule">
+            <p>📅 No classes scheduled for today</p>
+          </div>
+
+          <!-- Schedule List -->
+          <div class="schedule-list" *ngIf="todaySchedule.length > 0">
+            <div
+              *ngFor="let class of todaySchedule"
+              class="schedule-item"
+              [ngClass]="getStatusClass(class.status)"
+            >
+              <div class="schedule-content">
+                <div class="schedule-header">
+                  <div>
+                    <h3 class="schedule-subject">{{ class.subject }}</h3>
+                    <span class="schedule-code">{{ class.courseCode }}</span>
+                  </div>
+                  <span class="schedule-status-badge" [ngClass]="getStatusClass(class.status)">
+                    {{ class.status }}
+                  </span>
+                </div>
+                <p class="schedule-teacher">👨‍🏫 {{ class.teacher }}</p>
+                <p class="schedule-room">🏫 {{ class.room }}</p>
+                <p class="schedule-day">📅 {{ class.dayOfWeek }}</p>
+              </div>
+              <div class="schedule-time">
+                <span>{{ class.startTime }}</span>
+                <span>-</span>
+                <span>{{ class.endTime }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enrolled Courses Card -->
+        <div class="card enrolled-courses-card" *ngIf="enrolledCourses.length > 0">
+          <div class="card-header">
+            <h2 class="card-title">Enrolled Courses</h2>
+            <span class="course-count">{{ enrolledCourses.length }} Course<span *ngIf="enrolledCourses.length > 1">s</span></span>
+          </div>
+          <div class="enrolled-courses-list">
+            <div *ngFor="let course of enrolledCourses" class="enrolled-course-item">
+              <div class="course-icon">📚</div>
+              <div class="course-info">
+                <h4 class="course-name">{{ course.courseName }}</h4>
+                <span class="course-code">{{ course.courseCode }}</span>
+                <div class="course-meta">
+                  <span *ngIf="course.teacherName">👨‍🏫 {{ course.teacherName }}</span>
+                  <span *ngIf="course.credits">{{ course.credits }} Credits</span>
+                </div>
+                <div class="course-attendance-badge" 
+                     [style.background-color]="course.attendancePercentage >= 75 ? '#dcfce7' : '#fee2e2'"
+                     [style.color]="course.attendancePercentage >= 75 ? '#166534' : '#991b1b'">
+                  {{ course.attendancePercentage }}% Attendance
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <!-- <div class="card quick-actions-card">
+          <h2 class="card-title">Quick Actions</h2>
+          <div class="quick-actions-grid">
+            <button (click)="checkIn()" class="action-btn">
+              <span class="action-icon">✓</span>
+              <span class="action-label">Check In</span>
+            </button>
+            <button (click)="viewAttendanceHistory()" class="action-btn">
+              <span class="action-icon">📜</span>
+              <span class="action-label">View History</span>
+            </button>
+            <button (click)="navigateToCourseEnrollment()" class="action-btn">
+              <span class="action-icon">📚</span>
+              <span class="action-label">Courses</span>
+            </button>
+            <button (click)="viewProfile()" class="action-btn">
+              <span class="action-icon">👤</span>
+              <span class="action-label">Profile</span>
+            </button>
+          </div>
+        </div> -->
+
+      </div>
+    </div>
+  </div>
+
+</div>

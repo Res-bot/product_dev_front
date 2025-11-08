@@ -1,0 +1,125 @@
+<div 
+  *ngIf="isOpen" 
+  class="modal-overlay"
+  (click)="onClose()">
+</div>
+
+<div *ngIf="isOpen" class="modal-dialog">
+  <!-- Modal Header -->
+  <div class="modal-header">
+    <h2 class="modal-title">{{ isEditMode ? 'Edit Course' : 'Add Course' }}</h2>
+    <button 
+      class="close-button"
+      (click)="onClose()"
+      aria-label="Close modal">
+      ✕
+    </button>
+  </div>
+
+  <!-- Modal Body -->
+  <div class="modal-body">
+    <form (ngSubmit)="onSubmit()">
+      <!-- First Row: Course Name and Course Code -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="courseName" class="form-label">
+            Course Name <span class="required">*</span>
+          </label>
+          <input
+            id="courseName"
+            type="text"
+            class="form-input"
+            [(ngModel)]="form.name"
+            name="courseName"
+            placeholder="Enter course name"
+            required />
+        </div>
+        <div class="form-group">
+          <label for="courseCode" class="form-label">
+            Course Code <span class="required">*</span>
+          </label>
+          <input
+            id="courseCode"
+            type="text"
+            class="form-input"
+            [(ngModel)]="form.courseCode"
+            name="courseCode"
+            placeholder="Enter course code"
+            required />
+        </div>
+      </div>
+
+      <!-- Second Row: Department and Credits -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="department" class="form-label">
+            Select Department <span class="required">*</span>
+          </label>
+          <select
+            id="department"
+            class="form-select"
+            [(ngModel)]="form.departmentId"
+            name="department"
+            required>
+            <option [ngValue]="null" disabled>Select Department</option>
+            <option *ngFor="let dept of departments" [ngValue]="dept.id">
+              {{ dept.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="credits" class="form-label">
+            Credits <span class="required">*</span>
+          </label>
+          <select
+            id="credits"
+            class="form-select"
+            [(ngModel)]="form.credits"
+            name="credits"
+            required>
+            <option [ngValue]="null" disabled>Select Credits</option>
+            <option *ngFor="let credit of creditOptions" [ngValue]="credit">
+              {{ credit }} {{ credit === 1 ? 'Credit' : 'Credits' }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Third Row: Assign Teacher -->
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="teacher" class="form-label">
+            Assign Teacher <span class="required">*</span>
+          </label>
+          <select
+            id="teacher"
+            class="form-select"
+            [(ngModel)]="form.teacherId"
+            name="teacher"
+            required>
+            <option [ngValue]="null" disabled>Select Teacher</option>
+            <option *ngFor="let teacher of teachers" [ngValue]="teacher.id">
+              {{ teacher.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-cancel"
+          (click)="onClose()">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="!isFormValid()">
+          {{ isEditMode ? 'Update Course' : 'Add Course' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

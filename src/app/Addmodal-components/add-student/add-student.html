@@ -1,0 +1,177 @@
+<div 
+  *ngIf="isOpen" 
+  class="modal-overlay"
+  (click)="onClose()">
+</div>
+
+<div *ngIf="isOpen" class="modal-dialog" (click)="$event.stopPropagation()">
+  <div class="modal-header">
+    <h2 class="modal-title">
+      {{ isEditMode ? 'Edit User' : 'Add User' }}
+    </h2>
+    <button 
+      class="close-button"
+      (click)="onClose()"
+      aria-label="Close modal">
+      ✕
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <form (ngSubmit)="onSubmit()">
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name" class="form-label">
+            Name <span class="required">*</span>
+          </label>
+          <input
+            id="name"
+            type="text"
+            class="form-input"
+            [(ngModel)]="form.name"
+            name="name"
+            placeholder="Enter full name"
+            required />
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">
+            Email <span class="required">*</span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            class="form-input"
+            [(ngModel)]="form.email"
+            name="email"
+            placeholder="Enter email address"
+            required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password" class="form-label">
+            Password 
+            <span class="optional-text">(Leave blank for default password)</span>
+          </label>
+          <input
+            id="password"
+            type="password"
+            class="form-input"
+            [(ngModel)]="form.password"
+            name="password"
+            placeholder="Enter password or leave blank for 'default'" />
+          <small class="form-hint">Default password will be used if left blank</small>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneno" class="form-label">
+            Phone Number <span class="required">*</span>
+          </label>
+          <input
+            id="phoneno"
+            type="tel"
+            class="form-input"
+            [ngClass]="{'error': phoneError}"
+            [(ngModel)]="form.phoneno"
+            name="phoneno"
+            placeholder="Enter 10-digit phone number"
+            (input)="validatePhoneNumber($event)"
+            (blur)="onPhoneBlur()"
+            maxlength="10"
+            required />
+          <small class="error-message" *ngIf="phoneError">{{ phoneError }}</small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="role" class="form-label">
+            Select Role <span class="required">*</span>
+          </label>
+          <select
+            id="role"
+            class="form-select"
+            [(ngModel)]="form.role"
+            name="role"
+            (change)="onRoleChange()"
+            required>
+            <option [ngValue]="null" disabled>Select Role</option>
+            <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="department" class="form-label">
+            Select Department <span class="required">*</span>
+          </label>
+          <select
+            id="department"
+            class="form-select"
+            [(ngModel)]="form.department"
+            name="department"
+            required>
+            <option [ngValue]="null">Select Department</option>
+            <option *ngFor="let dept of departments" [value]="dept">
+              {{ dept }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" *ngIf="shouldShowDesignation">
+        <div class="form-group">
+          <label for="designation" class="form-label">
+            Designation 
+            <span class="required" *ngIf="isDesignationRequired">*</span>
+            <span class="optional-text" *ngIf="!isDesignationRequired">(Optional - N/A if not selected)</span>
+          </label>
+          <select
+            id="designation"
+            class="form-select"
+            [(ngModel)]="form.designation"
+            name="designation"
+            [required]="isDesignationRequired">
+            <option [ngValue]="null">Select Designation</option>
+            <option *ngFor="let d of availableDesignations" [value]="d">{{ d }}</option>
+          </select>
+          <small class="form-hint" *ngIf="form.role === 'STUDENT'">
+            Select your current year of study
+          </small>
+          <small class="form-hint" *ngIf="form.role === 'TEACHER'">
+            Select your teaching position
+          </small>
+          <small class="form-hint" *ngIf="form.role === 'EMPLOYEE'">
+            Select your staff position or leave blank
+          </small>
+        </div>
+        
+        <!-- Empty div for grid alignment -->
+        <div class="form-group"></div>
+      </div>
+
+      <!-- Info message for Admin role -->
+      <div class="info-message" *ngIf="form.role === 'ADMIN'">
+        <span class="info-icon">ℹ️</span>
+        <span>Designation is not required for Admin role (will be set to N/A)</span>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-cancel"
+          (click)="onClose()">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="!isFormValid()">
+          {{ isEditMode ? 'Update User' : 'Add User' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
